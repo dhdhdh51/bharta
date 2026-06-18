@@ -13,6 +13,7 @@ echo "User-agent: *\n";
 echo "Allow: /\n";
 echo "Disallow: /admin/\n";
 echo "Disallow: /includes/\n";
+echo "Disallow: /install.php\n";
 echo "Disallow: /config.php\n";
 echo "Disallow: /database.sql\n";
 echo "Disallow: /thank-you\n";

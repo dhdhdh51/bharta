@@ -24,10 +24,15 @@ define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5MB
 // Session Configuration
 define('SESSION_LIFETIME', 3600); // 1 hour
 
-// Error Reporting (set to 0 in production)
+// Debug Mode
+// Set to true while setting up / troubleshooting to see detailed errors.
+// IMPORTANT: set back to false on a live production site.
+define('DEBUG_MODE', true);
+
+// Error Reporting
 error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
+ini_set('display_errors', DEBUG_MODE ? '1' : '0');
+ini_set('log_errors', '1');
 
 // Timezone
 date_default_timezone_set('Asia/Kolkata');

@@ -16,7 +16,18 @@ function getDB(): PDO {
             ]);
         } catch (PDOException $e) {
             error_log("Database connection failed: " . $e->getMessage());
-            die("Database connection error. Please check configuration.");
+            $detail = (defined('DEBUG_MODE') && DEBUG_MODE)
+                ? '<br><br><strong>Details:</strong> ' . htmlspecialchars($e->getMessage())
+                  . '<br><br>Check your database credentials in <code>config.php</code> '
+                  . '(DB_HOST, DB_NAME, DB_USER, DB_PASS), and make sure you have imported '
+                  . '<code>database.sql</code> or run <a href="/install.php">/install.php</a>.'
+                : ' Please check configuration.';
+            http_response_code(500);
+            die('<div style="font-family:sans-serif;max-width:640px;margin:60px auto;padding:24px;'
+                . 'border:1px solid #E5E7EB;border-radius:10px">'
+                . '<h2 style="color:#071D49;margin:0 0 8px">Database connection error</h2>'
+                . '<p style="color:#475569;line-height:1.6">Bharat SEO could not connect to the database.'
+                . $detail . '</p></div>');
         }
     }
     return $pdo;

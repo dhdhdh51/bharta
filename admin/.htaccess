@@ -1,4 +1,13 @@
-# Admin panel - noindex
-<IfModule mod_headers.c>
-    Header set X-Robots-Tag "noindex, nofollow"
-</IfModule>
+# Admin panel
+#
+# This file intentionally contains NO Apache directives.
+#
+# Earlier versions used "Header set X-Robots-Tag" and "Options -Indexes" here,
+# but on shared hosts where AllowOverride does not permit those directives,
+# Apache returns HTTP 500 for the entire /admin/ folder (including the login page).
+#
+# noindex is now applied via PHP instead:
+#   - header('X-Robots-Tag: noindex, nofollow') in admin/index.php
+#   - <meta name="robots" content="noindex, nofollow"> in admin headers/login
+#
+# Directory listing is not a concern because index.php is the directory index.

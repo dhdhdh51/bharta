@@ -5,6 +5,12 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 
+// Keep the entire admin area out of search engines (replaces the .htaccess
+// Header directive, which can 500 on hosts with restricted AllowOverride).
+if (!headers_sent()) {
+    header('X-Robots-Tag: noindex, nofollow');
+}
+
 // Admin session check
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     $page = $_GET['page'] ?? '';
@@ -16,7 +22,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 $page = $_GET['page'] ?? 'dashboard';
 
 // Force password change
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['must_change_password'] && $page !== 'change-password' && $page !== 'logout') {
+if (isset($_SESSION['admin_logged_in']) && ($_SESSION['must_change_password'] ?? false) && $page !== 'change-password' && $page !== 'logout') {
     redirect('/admin/?page=change-password');
 }
 
