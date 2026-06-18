@@ -41,19 +41,19 @@ require_once __DIR__ . '/../includes/header.php';
                 </p>
                 <div class="hero-stats">
                     <div class="hero-stat">
-                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
                         <span class="hero-stat-text">Website + SEO Setup</span>
                     </div>
                     <div class="hero-stat">
-                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
                         <span class="hero-stat-text">Google Map Visibility</span>
                     </div>
                     <div class="hero-stat">
-                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
                         <span class="hero-stat-text">WhatsApp Lead System</span>
                     </div>
                     <div class="hero-stat">
-                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8A00" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                        <div class="hero-stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
                         <span class="hero-stat-text">Local Business Growth</span>
                     </div>
                 </div>

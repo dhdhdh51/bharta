@@ -26,10 +26,10 @@
     --space-md: 1rem;
     --space-lg: 1.5rem;
     --space-xl: 2rem;
-    --space-2xl: 3rem;
-    --space-3xl: 4rem;
-    --space-4xl: 6rem;
-    --space-5xl: 8rem;
+    --space-2xl: 2.75rem;
+    --space-3xl: 3.25rem;
+    --space-4xl: 4.5rem;
+    --space-5xl: 6rem;
 
     --radius-sm: 6px;
     --radius-md: 10px;
@@ -162,7 +162,8 @@ h4 { font-size: 1.25rem; }
     box-shadow: 0 4px 14px rgba(255, 138, 0, 0.3);
 }
 .btn-primary:hover {
-    background: #e67a00;
+    background: var(--color-secondary);
+    filter: brightness(0.92);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(255, 138, 0, 0.4);
 }
@@ -183,7 +184,8 @@ h4 { font-size: 1.25rem; }
     color: white;
 }
 .btn-accent:hover {
-    background: #1452d4;
+    background: var(--color-accent);
+    filter: brightness(0.9);
     transform: translateY(-2px);
 }
 
@@ -433,9 +435,8 @@ h4 { font-size: 1.25rem; }
 .hero {
     position: relative;
     background: var(--color-primary);
-    padding: calc(var(--header-height) + 4rem) 0 5rem;
+    padding: calc(var(--header-height) + 3rem) 0 3.5rem;
     overflow: hidden;
-    min-height: 80vh;
     display: flex;
     align-items: center;
 }
@@ -1600,3 +1601,48 @@ h4 { font-size: 1.25rem; }
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
+
+
+/* ============================================
+   Responsive Spacing Tightening
+   Reduces excessive vertical white space on
+   smaller screens for a tighter, premium feel.
+   ============================================ */
+@media (max-width: 1024px) {
+    .section { padding: 3.5rem 0; }
+    .section-lg { padding: 4.5rem 0; }
+    .section-sm { padding: 2.75rem 0; }
+    .cta-section { padding: 3.5rem 0; }
+}
+
+@media (max-width: 640px) {
+    .section { padding: 2.75rem 0; }
+    .section-lg { padding: 3.25rem 0; }
+    .section-sm { padding: 2.25rem 0; }
+    .cta-section { padding: 2.75rem 0; }
+
+    /* Tighten the gap created above headings/grids */
+    .services-grid,
+    .industry-grid,
+    .steps-grid,
+    .packages-grid,
+    .testimonials-grid,
+    .case-grid,
+    .blog-grid { margin-top: 1.75rem; gap: 1rem; }
+
+    .faq-list { margin-top: 1.75rem; }
+
+    .section-heading { margin-bottom: 1rem; }
+
+    /* Hero spacing on phones */
+    .hero { padding: calc(var(--header-height) + 2rem) 0 2.5rem; }
+    .hero-stats { margin-top: 1.75rem; }
+
+    /* Footer breathing room without being huge */
+    .site-footer { padding: 3rem 0 1.5rem; }
+    .footer-grid { gap: 2rem; margin-bottom: 2rem; }
+}
+
+/* Remove the bottom-padding gap from a section that is immediately
+   followed by another section of the same background (avoids double spacing) */
+.section + .cta-section { padding-top: 0; }
