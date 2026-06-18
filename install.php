@@ -20,35 +20,65 @@ function step(string $label, bool $success, string $detail = ''): void {
 }
 
 if ($run) {
-    // 1. Connect to MySQL server (no database selected yet)
+    // 1. Connect to MySQL. On shared hosting the database is usually created in
+    //    cPanel and the DB user has no CREATE DATABASE privilege, so we connect
+    //    directly to DB_NAME. We fall back to a server-level connection (which can
+    //    create the database) for local/VPS setups.
     $pdo = null;
+    $dbExists = false;
     try {
         $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";charset=" . DB_CHARSET,
+            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
             DB_USER,
             DB_PASS,
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
-        step('Connected to MySQL server (' . DB_HOST . ')', true);
+        $dbExists = true;
+        step('Connected to existing database `' . DB_NAME . '`', true);
     } catch (PDOException $e) {
-        step('Connect to MySQL server', false, $e->getMessage()
-            . ' — check DB_HOST / DB_USER / DB_PASS in config.php');
+        // Database may not exist yet — try connecting to the server to create it.
+        try {
+            $pdo = new PDO(
+                "mysql:host=" . DB_HOST . ";charset=" . DB_CHARSET,
+                DB_USER,
+                DB_PASS,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+            );
+            step('Connected to MySQL server (' . DB_HOST . ')', true);
+            try {
+                $pdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                $pdo->exec("USE `" . DB_NAME . "`");
+                $dbExists = true;
+                step('Created database `' . DB_NAME . '`', true);
+            } catch (PDOException $e2) {
+                step('Create database `' . DB_NAME . '`', false,
+                    $e2->getMessage() . ' — on shared hosting, create the database in '
+                    . 'cPanel/Plesk first, then set its exact name in config.php (DB_NAME).');
+            }
+        } catch (PDOException $e3) {
+            step('Connect to database', false, $e3->getMessage()
+                . ' — check DB_HOST / DB_USER / DB_PASS / DB_NAME in config.php');
+        }
     }
 
-    // 2. Read and execute database.sql
-    if ($pdo) {
+    // 2. Read database.sql and run only the table/seed statements (skip the
+    //    CREATE DATABASE / USE lines which require elevated privileges).
+    if ($pdo && $dbExists) {
         $sqlFile = __DIR__ . '/database.sql';
         if (!is_readable($sqlFile)) {
             step('Read database.sql', false, 'File not found or not readable at ' . $sqlFile);
         } else {
             $sql = file_get_contents($sqlFile);
+            // Strip the leading CREATE DATABASE / USE statements.
+            $sql = preg_replace('/^\s*CREATE\s+DATABASE[^;]*;/im', '', $sql);
+            $sql = preg_replace('/^\s*USE\s+`?[A-Za-z0-9_]+`?\s*;/im', '', $sql);
             step('Read database.sql (' . number_format(strlen($sql)) . ' bytes)', true);
             try {
-                // PDO_MYSQL supports multiple statements in a single exec()
-                $pdo->exec($sql);
-                step('Executed schema and seed data', true);
+                $pdo->exec("USE `" . DB_NAME . "`");
+                $pdo->exec($sql); // PDO_MYSQL supports multiple statements in one exec()
+                step('Created tables and inserted seed data', true);
             } catch (PDOException $e) {
-                step('Execute schema and seed data', false, $e->getMessage());
+                step('Create tables / seed data', false, $e->getMessage());
             }
         }
     }
