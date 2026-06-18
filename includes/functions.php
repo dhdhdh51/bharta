@@ -108,3 +108,36 @@ function jsonDecode(string $json): array {
     $data = json_decode($json, true);
     return is_array($data) ? $data : [];
 }
+
+
+/**
+ * Handle an admin image upload from a file input.
+ * Returns the public URL on success, or null if no/invalid file.
+ * Used by Services, Industries, Portfolio, Case Studies, etc.
+ */
+function handleImageUpload(string $field): ?string {
+    if (empty($_FILES[$field]['name']) || ($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return null;
+    }
+    $file = $_FILES[$field];
+    if ($file['size'] > MAX_UPLOAD_SIZE) {
+        return null;
+    }
+    $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : null;
+    $mime = $finfo ? finfo_file($finfo, $file['tmp_name']) : ($file['type'] ?? '');
+    if ($finfo) finfo_close($finfo);
+    if (!in_array($mime, $allowed, true)) {
+        return null;
+    }
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) ?: 'jpg';
+    $base = createSlug(pathinfo($file['name'], PATHINFO_FILENAME)) ?: 'image';
+    $name = date('Y-m-d-His') . '-' . $base . '.' . $ext;
+    if (!is_dir(UPLOAD_DIR)) {
+        @mkdir(UPLOAD_DIR, 0755, true);
+    }
+    if (move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $name)) {
+        return UPLOAD_URL . $name;
+    }
+    return null;
+}

@@ -6,6 +6,7 @@ $agencyName = getSetting('agency_name', 'Bharat SEO');
 $phone = getSetting('phone', '+91-XXXXXXXXXX');
 $whatsapp = getSetting('whatsapp', '+91-XXXXXXXXXX');
 $whatsappClean = preg_replace('/[^0-9]/', '', $whatsapp);
+$brandColor = getSetting('brand_color', '');
 $primaryColor = getSetting('primary_color', '#071D49');
 $secondaryColor = getSetting('secondary_color', '#FF8A00');
 $accentColor = getSetting('accent_color', '#1B66FF');
@@ -29,11 +30,26 @@ $scVerification = getSetting('search_console_verification');
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
+    <?php if ($brandColor): /* Single Brand Color theme: whole site uses one color + shades */ ?>
+        :root {
+            --brand: <?= sanitize($brandColor) ?>;
+            /* Dark shade for hero / CTA / footer backgrounds and headings */
+            --color-primary: <?= sanitize($brandColor) ?>;
+            --color-primary: color-mix(in srgb, var(--brand) 80%, #05070d);
+            /* Buttons + main accents use the brand color directly */
+            --color-secondary: var(--brand);
+            /* Links / icons / small highlights use the brand color */
+            --color-accent: var(--brand);
+        }
+        /* Soft brand-tinted surface so section backgrounds match the theme */
+        :root { --color-bg: color-mix(in srgb, var(--brand) 5%, #ffffff); }
+    <?php else: /* Classic 3-colour theme */ ?>
         :root {
             --color-primary: <?= sanitize($primaryColor) ?>;
             --color-secondary: <?= sanitize($secondaryColor) ?>;
             --color-accent: <?= sanitize($accentColor) ?>;
         }
+    <?php endif; ?>
     </style>
     <?php echo renderSchema($pageSeo ?? [], $pageSchemas ?? []); ?>
 </head>

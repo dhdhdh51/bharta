@@ -10,7 +10,8 @@ $editId = intval($_GET['id'] ?? 0);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     $postAction = $_POST['action'] ?? '';
     if ($postAction === 'save') {
-        $data = [sanitize($_POST['title']??''), createSlug($_POST['slug']?:$_POST['title']), sanitize($_POST['featured_image']??''), sanitize($_POST['hero_heading']??''), sanitize($_POST['hero_text']??''), $_POST['pain_points']??'[]', $_POST['benefits']??'[]', $_POST['services_offered']??'', $_POST['process_steps']??'', $_POST['faqs']??'[]', sanitize($_POST['cta_text']??'Get Free Audit'), intval($_POST['sort_order']??0), isset($_POST['is_active'])?1:0, sanitize($_POST['meta_title']??''), sanitize($_POST['meta_description']??''), sanitize($_POST['meta_keywords']??''), $_POST['schema_json']??''];
+        $imageUpload = handleImageUpload('featured_image_file');
+        $data = [sanitize($_POST['title']??''), createSlug($_POST['slug']?:$_POST['title']), ($imageUpload ?: sanitize($_POST['featured_image']??'')), sanitize($_POST['hero_heading']??''), sanitize($_POST['hero_text']??''), $_POST['pain_points']??'[]', $_POST['benefits']??'[]', $_POST['services_offered']??'', $_POST['process_steps']??'', $_POST['faqs']??'[]', sanitize($_POST['cta_text']??'Get Free Audit'), intval($_POST['sort_order']??0), isset($_POST['is_active'])?1:0, sanitize($_POST['meta_title']??''), sanitize($_POST['meta_description']??''), sanitize($_POST['meta_keywords']??''), $_POST['schema_json']??''];
         $id = intval($_POST['id']??0);
         if ($id) {
             $stmt = getDB()->prepare("UPDATE industries SET title=?,slug=?,featured_image=?,hero_heading=?,hero_text=?,pain_points=?,benefits=?,services_offered=?,process_steps=?,faqs=?,cta_text=?,sort_order=?,is_active=?,meta_title=?,meta_description=?,meta_keywords=?,schema_json=? WHERE id=?");
@@ -48,10 +49,16 @@ $item = ['title'=>'','slug'=>'','featured_image'=>'','hero_heading'=>'','hero_te
 if ($editId) { $s = getDB()->prepare("SELECT * FROM industries WHERE id=?"); $s->execute([$editId]); $item = $s->fetch() ?: $item; }
 ?>
 <h1 class="admin-page-title"><?= $editId?'Edit':'Add' ?> Industry</h1>
-<form method="POST" class="admin-form">
+<form method="POST" class="admin-form" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="<?= $editId ?>">
     <div class="admin-form-grid"><div class="admin-form-group"><label>Title *</label><input type="text" name="title" value="<?= sanitize($item['title']) ?>" required class="admin-input"></div><div class="admin-form-group"><label>Slug</label><input type="text" name="slug" value="<?= sanitize($item['slug']) ?>" class="admin-input"></div></div>
-    <div class="admin-form-group"><label>Featured Image</label><input type="text" name="featured_image" value="<?= sanitize($item['featured_image']) ?>" class="admin-input"></div>
+    <div class="admin-form-group">
+        <label>Featured Image — Upload image</label>
+        <input type="file" name="featured_image_file" accept="image/*" class="admin-input">
+        <label style="margin-top:.5rem">…or paste Featured Image URL</label>
+        <input type="text" name="featured_image" value="<?= sanitize($item['featured_image']) ?>" class="admin-input" placeholder="https://...">
+        <?php if (!empty($item['featured_image'])): ?><img src="<?= sanitize($item['featured_image']) ?>" alt="" style="margin-top:.5rem;max-height:64px;border-radius:6px"><?php endif; ?>
+    </div>
     <div class="admin-form-grid"><div class="admin-form-group"><label>Hero Heading</label><input type="text" name="hero_heading" value="<?= sanitize($item['hero_heading']) ?>" class="admin-input"></div><div class="admin-form-group"><label>CTA Text</label><input type="text" name="cta_text" value="<?= sanitize($item['cta_text']) ?>" class="admin-input"></div></div>
     <div class="admin-form-group"><label>Hero Text</label><textarea name="hero_text" class="admin-input" rows="3"><?= sanitize($item['hero_text']) ?></textarea></div>
     <div class="admin-form-group"><label>Pain Points (JSON array)</label><textarea name="pain_points" class="admin-input" rows="3"><?= sanitize($item['pain_points']) ?></textarea></div>

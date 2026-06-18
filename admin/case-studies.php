@@ -10,7 +10,8 @@ $editId = intval($_GET['id'] ?? 0);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     $pa = $_POST['action'] ?? '';
     if ($pa === 'save') {
-        $data = [sanitize($_POST['title']??''), createSlug($_POST['slug']?:$_POST['title']), sanitize($_POST['client_name']??''), sanitize($_POST['industry']??''), sanitize($_POST['city']??''), sanitize($_POST['challenge']??''), sanitize($_POST['strategy']??''), sanitize($_POST['work_done']??''), sanitize($_POST['result_summary']??''), sanitize($_POST['featured_image']??''), $_POST['gallery']??'', sanitize($_POST['website_url']??''), sanitize($_POST['google_maps_link']??''), isset($_POST['is_active'])?1:0, sanitize($_POST['meta_title']??''), sanitize($_POST['meta_description']??''), $_POST['schema_json']??''];
+        $imgUp = handleImageUpload('featured_image_file');
+        $data = [sanitize($_POST['title']??''), createSlug($_POST['slug']?:$_POST['title']), sanitize($_POST['client_name']??''), sanitize($_POST['industry']??''), sanitize($_POST['city']??''), sanitize($_POST['challenge']??''), sanitize($_POST['strategy']??''), sanitize($_POST['work_done']??''), sanitize($_POST['result_summary']??''), ($imgUp ?: sanitize($_POST['featured_image']??'')), $_POST['gallery']??'', sanitize($_POST['website_url']??''), sanitize($_POST['google_maps_link']??''), isset($_POST['is_active'])?1:0, sanitize($_POST['meta_title']??''), sanitize($_POST['meta_description']??''), $_POST['schema_json']??''];
         $id = intval($_POST['id']??0);
         if ($id) {
             getDB()->prepare("UPDATE case_studies SET title=?,slug=?,client_name=?,industry=?,city=?,challenge=?,strategy=?,work_done=?,result_summary=?,featured_image=?,gallery=?,website_url=?,google_maps_link=?,is_active=?,meta_title=?,meta_description=?,schema_json=? WHERE id=?")->execute([...$data,$id]);
@@ -38,11 +39,18 @@ $item = ['title'=>'','slug'=>'','client_name'=>'','industry'=>'','city'=>'','cha
 if ($editId) { $s=getDB()->prepare("SELECT * FROM case_studies WHERE id=?"); $s->execute([$editId]); $item=$s->fetch()?:$item; }
 ?>
 <h1 class="admin-page-title"><?= $editId?'Edit':'Add' ?> Case Study</h1>
-<form method="POST" class="admin-form">
+<form method="POST" class="admin-form" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="<?= $editId ?>">
     <div class="admin-form-grid"><div class="admin-form-group"><label>Title *</label><input type="text" name="title" value="<?= sanitize($item['title']) ?>" required class="admin-input"></div><div class="admin-form-group"><label>Slug</label><input type="text" name="slug" value="<?= sanitize($item['slug']) ?>" class="admin-input"></div></div>
     <div class="admin-form-grid"><div class="admin-form-group"><label>Client Name</label><input type="text" name="client_name" value="<?= sanitize($item['client_name']) ?>" class="admin-input"></div><div class="admin-form-group"><label>Industry</label><input type="text" name="industry" value="<?= sanitize($item['industry']) ?>" class="admin-input"></div></div>
-    <div class="admin-form-grid"><div class="admin-form-group"><label>City</label><input type="text" name="city" value="<?= sanitize($item['city']) ?>" class="admin-input"></div><div class="admin-form-group"><label>Featured Image</label><input type="text" name="featured_image" value="<?= sanitize($item['featured_image']) ?>" class="admin-input"></div></div>
+    <div class="admin-form-group"><label>City</label><input type="text" name="city" value="<?= sanitize($item['city']) ?>" class="admin-input"></div>
+    <div class="admin-form-group">
+        <label>Featured Image — Upload image</label>
+        <input type="file" name="featured_image_file" accept="image/*" class="admin-input">
+        <label style="margin-top:.5rem">…or paste Featured Image URL</label>
+        <input type="text" name="featured_image" value="<?= sanitize($item['featured_image']) ?>" class="admin-input" placeholder="https://...">
+        <?php if (!empty($item['featured_image'])): ?><img src="<?= sanitize($item['featured_image']) ?>" alt="" style="margin-top:.5rem;max-height:64px;border-radius:6px"><?php endif; ?>
+    </div>
     <div class="admin-form-group"><label>Challenge</label><textarea name="challenge" class="admin-input" rows="3"><?= sanitize($item['challenge']) ?></textarea></div>
     <div class="admin-form-group"><label>Strategy</label><textarea name="strategy" class="admin-input" rows="3"><?= sanitize($item['strategy']) ?></textarea></div>
     <div class="admin-form-group"><label>Work Done</label><textarea name="work_done" class="admin-input" rows="3"><?= sanitize($item['work_done']) ?></textarea></div>

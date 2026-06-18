@@ -7,6 +7,11 @@ $flash = getFlash();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     unset($_POST['csrf_token'], $_POST['action']);
+    // If admin chose to clear the brand color, switch back to the 3-colour theme.
+    if (!empty($_POST['brand_color_clear'])) {
+        $_POST['brand_color'] = '';
+    }
+    unset($_POST['brand_color_clear']);
     foreach ($_POST as $key => $value) {
         $stmt = getDB()->prepare("INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
         $stmt->execute([$key, $value, $value]);
@@ -35,6 +40,18 @@ require __DIR__ . '/admin-header.php';
     </div>
 
     <h2 style="margin: 2rem 0 1rem;">Colors</h2>
+    <div class="admin-form-group" style="background:#f1f5f9;padding:1rem;border-radius:8px;">
+        <label style="font-weight:600;">Brand Color (Single-Colour Theme)</label>
+        <input type="color" name="brand_color" value="<?= getSetting('brand_color', '#071D49') ?: '#071D49' ?>" class="admin-input" style="height:48px;max-width:120px">
+        <p style="font-size:0.8rem;color:#64748b;margin-top:0.4rem;">
+            Set this to make the <strong>entire website use ONE colour</strong> (hero, buttons, links, icons, headings)
+            with automatic shades. Leave it empty / clear it to use the three separate colours below instead.
+        </p>
+        <label style="font-weight:500;margin-top:0.6rem;display:block;">
+            <input type="checkbox" name="brand_color_clear" value="1"> Clear Brand Color (switch back to 3-colour theme)
+        </label>
+    </div>
+    <p style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;">Advanced — these 3 colours are only used when Brand Color above is empty:</p>
     <div class="admin-form-grid" style="grid-template-columns: repeat(3, 1fr);">
         <div class="admin-form-group"><label>Primary Color</label><input type="color" name="primary_color" value="<?= getSetting('primary_color', '#071D49') ?>" class="admin-input" style="height:44px"></div>
         <div class="admin-form-group"><label>Secondary Color</label><input type="color" name="secondary_color" value="<?= getSetting('secondary_color', '#FF8A00') ?>" class="admin-input" style="height:44px"></div>

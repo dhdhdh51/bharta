@@ -334,6 +334,7 @@ INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES
 ('primary_color', '#071D49'),
 ('secondary_color', '#FF8A00'),
 ('accent_color', '#1B66FF'),
+('brand_color', ''),
 ('phone', '+91-XXXXXXXXXX'),
 ('whatsapp', '+91-XXXXXXXXXX'),
 ('email', 'hello@bharatseo.in'),

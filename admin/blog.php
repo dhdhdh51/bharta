@@ -10,12 +10,13 @@ $editId = intval($_GET['id'] ?? 0);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     $pa = $_POST['action'] ?? '';
     if ($pa === 'save') {
+        $imgUp = handleImageUpload('featured_image_file');
         $data = [
             sanitize($_POST['title']??''),
             createSlug($_POST['slug']?:$_POST['title']),
             intval($_POST['category_id']??0) ?: null,
             sanitize($_POST['author']??'Bharat SEO Team'),
-            sanitize($_POST['featured_image']??''),
+            ($imgUp ?: sanitize($_POST['featured_image']??'')),
             $_POST['content'] ?? '',
             sanitize($_POST['excerpt']??''),
             sanitize($_POST['meta_title']??''),
@@ -61,7 +62,7 @@ $item = ['title'=>'','slug'=>'','category_id'=>'','author'=>'Bharat SEO Team','f
 if ($editId) { $s=getDB()->prepare("SELECT * FROM blog_posts WHERE id=?"); $s->execute([$editId]); $item=$s->fetch()?:$item; }
 ?>
 <h1 class="admin-page-title"><?= $editId?'Edit':'New' ?> Blog Post</h1>
-<form method="POST" class="admin-form">
+<form method="POST" class="admin-form" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="<?= $editId ?>">
     <div class="admin-form-group"><label>Title *</label><input type="text" name="title" value="<?= sanitize($item['title']) ?>" required class="admin-input"></div>
     <div class="admin-form-grid"><div class="admin-form-group"><label>Slug</label><input type="text" name="slug" value="<?= sanitize($item['slug']) ?>" class="admin-input"></div><div class="admin-form-group"><label>Author</label><input type="text" name="author" value="<?= sanitize($item['author']) ?>" class="admin-input"></div></div>
@@ -69,7 +70,16 @@ if ($editId) { $s=getDB()->prepare("SELECT * FROM blog_posts WHERE id=?"); $s->e
         <div class="admin-form-group"><label>Category</label><select name="category_id" class="admin-input"><option value="">None</option><?php foreach ($categories as $c): ?><option value="<?= $c['id'] ?>" <?= $item['category_id']==$c['id']?'selected':'' ?>><?= sanitize($c['name']) ?></option><?php endforeach; ?></select></div>
         <div class="admin-form-group"><label>Status</label><select name="status" class="admin-input"><option value="draft" <?= $item['status']==='draft'?'selected':'' ?>>Draft</option><option value="published" <?= $item['status']==='published'?'selected':'' ?>>Published</option></select></div>
     </div>
-    <div class="admin-form-grid"><div class="admin-form-group"><label>Featured Image</label><input type="text" name="featured_image" value="<?= sanitize($item['featured_image']) ?>" class="admin-input"></div><div class="admin-form-group"><label>Publish Date</label><input type="datetime-local" name="publish_date" value="<?= date('Y-m-d\TH:i', strtotime($item['publish_date'])) ?>" class="admin-input"></div></div>
+    <div class="admin-form-grid">
+        <div class="admin-form-group">
+            <label>Featured Image — Upload image</label>
+            <input type="file" name="featured_image_file" accept="image/*" class="admin-input">
+            <label style="margin-top:.5rem">…or paste Featured Image URL</label>
+            <input type="text" name="featured_image" value="<?= sanitize($item['featured_image']) ?>" class="admin-input" placeholder="https://...">
+            <?php if (!empty($item['featured_image'])): ?><img src="<?= sanitize($item['featured_image']) ?>" alt="" style="margin-top:.5rem;max-height:64px;border-radius:6px"><?php endif; ?>
+        </div>
+        <div class="admin-form-group"><label>Publish Date</label><input type="datetime-local" name="publish_date" value="<?= date('Y-m-d\TH:i', strtotime($item['publish_date'])) ?>" class="admin-input"></div>
+    </div>
     <div class="admin-form-group"><label>Excerpt</label><textarea name="excerpt" class="admin-input" rows="2"><?= sanitize($item['excerpt']) ?></textarea></div>
     <div class="admin-form-group"><label>Content (HTML)</label><textarea name="content" class="admin-input" rows="15"><?= htmlspecialchars($item['content']) ?></textarea></div>
     <div class="admin-form-group"><label>FAQs (JSON [{q,a}])</label><textarea name="faqs" class="admin-input" rows="3"><?= sanitize($item['faqs']) ?></textarea></div>

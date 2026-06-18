@@ -12,11 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
     $postAction = $_POST['action'] ?? '';
 
     if ($postAction === 'save') {
+        // Allow either an uploaded file OR a pasted URL for icon & featured image
+        $iconUpload  = handleImageUpload('icon_file');
+        $imageUpload = handleImageUpload('featured_image_file');
         $data = [
             'title' => sanitize($_POST['title'] ?? ''),
             'slug' => createSlug($_POST['slug'] ?: $_POST['title']),
-            'icon' => sanitize($_POST['icon'] ?? ''),
-            'featured_image' => sanitize($_POST['featured_image'] ?? ''),
+            'icon' => $iconUpload ?: sanitize($_POST['icon'] ?? ''),
+            'featured_image' => $imageUpload ?: sanitize($_POST['featured_image'] ?? ''),
             'short_description' => sanitize($_POST['short_description'] ?? ''),
             'full_description' => sanitize($_POST['full_description'] ?? ''),
             'benefits' => $_POST['benefits'] ?? '[]',
@@ -97,7 +100,7 @@ if ($editId) {
 }
 ?>
 <h1 class="admin-page-title"><?= $editId ? 'Edit' : 'Add' ?> Service</h1>
-<form method="POST" class="admin-form">
+<form method="POST" class="admin-form" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
     <input type="hidden" name="action" value="save">
     <input type="hidden" name="id" value="<?= $editId ?>">
@@ -107,8 +110,20 @@ if ($editId) {
         <div class="admin-form-group"><label>Slug</label><input type="text" name="slug" value="<?= sanitize($service['slug']) ?>" class="admin-input" placeholder="Auto-generated from title"></div>
     </div>
     <div class="admin-form-grid">
-        <div class="admin-form-group"><label>Icon URL</label><input type="text" name="icon" value="<?= sanitize($service['icon']) ?>" class="admin-input"></div>
-        <div class="admin-form-group"><label>Featured Image URL</label><input type="text" name="featured_image" value="<?= sanitize($service['featured_image']) ?>" class="admin-input"></div>
+        <div class="admin-form-group">
+            <label>Icon — Upload image</label>
+            <input type="file" name="icon_file" accept="image/*" class="admin-input">
+            <label style="margin-top:.5rem">…or paste Icon URL</label>
+            <input type="text" name="icon" value="<?= sanitize($service['icon']) ?>" class="admin-input" placeholder="https://...">
+            <?php if (!empty($service['icon'])): ?><img src="<?= sanitize($service['icon']) ?>" alt="" style="margin-top:.5rem;max-height:48px;border-radius:6px"><?php endif; ?>
+        </div>
+        <div class="admin-form-group">
+            <label>Featured Image — Upload image</label>
+            <input type="file" name="featured_image_file" accept="image/*" class="admin-input">
+            <label style="margin-top:.5rem">…or paste Featured Image URL</label>
+            <input type="text" name="featured_image" value="<?= sanitize($service['featured_image']) ?>" class="admin-input" placeholder="https://...">
+            <?php if (!empty($service['featured_image'])): ?><img src="<?= sanitize($service['featured_image']) ?>" alt="" style="margin-top:.5rem;max-height:64px;border-radius:6px"><?php endif; ?>
+        </div>
     </div>
     <div class="admin-form-group"><label>Short Description</label><textarea name="short_description" class="admin-input" rows="3"><?= sanitize($service['short_description']) ?></textarea></div>
     <div class="admin-form-group"><label>Full Description</label><textarea name="full_description" class="admin-input" rows="6"><?= sanitize($service['full_description']) ?></textarea></div>
